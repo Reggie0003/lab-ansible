@@ -1,0 +1,2 @@
+firewall_services: [ssh, nfs, rpc-bind, mountd]
+firewall_ports: [10050/tcp]   # Zabbix agent on every node

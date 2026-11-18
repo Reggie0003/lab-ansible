@@ -1,0 +1,2 @@
+firewall_services: [ssh, http, https]
+firewall_ports: [10050/tcp, 10051/tcp]   # agent + Zabbix server

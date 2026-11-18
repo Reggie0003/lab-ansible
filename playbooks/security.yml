@@ -1,0 +1,41 @@
+- name: Firewalld and SELinux baseline
+  hosts: lab
+  become: true
+  tasks:
+    - name: Ensure firewalld is installed
+      ansible.builtin.dnf:
+        name: firewalld
+        state: present
+
+    - name: Ensure firewalld is running and enabled
+      ansible.builtin.service:
+        name: firewalld
+        state: started
+        enabled: true
+
+    - name: Allow role services
+      ansible.posix.firewalld:
+        service: "{{ item }}"
+        permanent: true
+        immediate: true
+        state: enabled
+      loop: "{{ firewall_services }}"
+
+    - name: Allow role ports
+      ansible.posix.firewalld:
+        port: "{{ item }}"
+        permanent: true
+        immediate: true
+        state: enabled
+      loop: "{{ firewall_ports }}"
+
+    - name: Ensure SELinux is enforcing
+      ansible.posix.selinux:
+        policy: targeted
+        state: enforcing
+      register: selinux_result
+
+    - name: Warn if a reboot is needed for SELinux
+      ansible.builtin.debug:
+        msg: "SELinux change needs a reboot on {{ inventory_hostname }}"
+      when: selinux_result.reboot_required | default(false)
