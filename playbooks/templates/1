@@ -1,0 +1,13 @@
+# Managed by Ansible - manual edits will be overwritten
+ServerTokens Prod
+ServerSignature Off
+TraceEnable Off
+
+Header always set X-Content-Type-Options "nosniff"
+Header always set X-Frame-Options "SAMEORIGIN"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+<Directory "/var/www/html">
+    Options -Indexes
+    AllowOverride None
+</Directory>
