@@ -1,0 +1,20 @@
+- name: Domain controller health check (read-only)
+  hosts: windows
+  gather_facts: true
+  tasks:
+    - name: Check core AD services
+      ansible.windows.win_service_info:
+        name: "{{ item }}"
+      loop: [NTDS, DNS, Netlogon, kdc, W32Time]
+      register: svc
+
+    - name: Report service states
+      ansible.builtin.debug:
+        msg: "{{ item.item }} = {{ item.services[0].state }}"
+      loop: "{{ svc.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+
+    - name: Show OS and domain
+      ansible.builtin.debug:
+        msg: "{{ ansible_hostname }} | {{ ansible_os_name }} | domain: {{ ansible_domain }}"
