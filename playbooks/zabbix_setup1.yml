@@ -78,6 +78,27 @@
         enabled: true
       loop: [zabbix-server, httpd, php-fpm]
 
+    - name: Create httpd override folder
+      ansible.builtin.file:
+        path: /etc/systemd/system/httpd.service.d
+        state: directory
+        mode: '0755'
+
+    - name: Make httpd retry if it fails to start
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/httpd.service.d/restart.conf
+        content: |
+          [Service]
+          Restart=on-failure
+          RestartSec=10
+        mode: '0644'
+      register: httpd_dropin
+
+    - name: Reload systemd after the change
+      ansible.builtin.systemd:
+        daemon_reload: true
+      when: httpd_dropin.changed
+
   handlers:
     - name: Restart zabbix-server
       ansible.builtin.service:
