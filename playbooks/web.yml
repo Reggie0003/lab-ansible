@@ -7,6 +7,7 @@
       ansible.builtin.dnf:
         name: [httpd, mod_ssl]
         state: present
+      tags: [apache, apache_install]
 
     - name: Deploy hardening config
       ansible.builtin.template:
@@ -16,6 +17,7 @@
         group: root
         mode: '0644'
       notify: Restart httpd
+      tags: [apache, apache_config]
 
     - name: Deploy test page
       ansible.builtin.template:
@@ -24,12 +26,14 @@
         owner: root
         group: root
         mode: '0644'
+      tags: [apache, web_content]
 
     - name: Ensure httpd is running and enabled
       ansible.builtin.service:
         name: httpd
         state: started
         enabled: true
+      tags: [apache, apache_service]
 
   handlers:
     - name: Restart httpd
