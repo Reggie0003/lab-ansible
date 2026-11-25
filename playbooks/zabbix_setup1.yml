@@ -51,6 +51,7 @@
         zcat /usr/share/zabbix-sql-scripts/mysql/server.sql.gz | mysql --default-character-set=utf8mb4 -uzabbix -p'{{ vault_zabbix_db_password }}' zabbix
         mysql -uroot -e "SET GLOBAL log_bin_trust_function_creators = 0;"
       when: table_count.stdout | int == 0
+      changed_when: true
       no_log: true
 
     - name: Set DB password in zabbix_server.conf
@@ -92,18 +93,17 @@
           Restart=on-failure
           RestartSec=10
         mode: '0644'
-      register: httpd_dropin
-
-    - name: Reload systemd after the change
-      ansible.builtin.systemd:
-        daemon_reload: true
-      when: httpd_dropin.changed
+      notify: Reload systemd
 
   handlers:
     - name: Restart zabbix-server
       ansible.builtin.service:
         name: zabbix-server
         state: restarted
+
+    - name: Reload systemd
+      ansible.builtin.systemd:
+        daemon_reload: true
 
 
 - name: Zabbix agent 2 on every Linux node
@@ -130,9 +130,9 @@
         regexp: "^#?\\s*{{ item.key }}="
         line: "{{ item.key }}={{ item.value }}"
       loop:
-        - { key: Server,       value: "{{ zabbix_server_ip }},127.0.0.1" }
+        - { key: Server, value: "{{ zabbix_server_ip }},127.0.0.1" }
         - { key: ServerActive, value: "{{ zabbix_server_ip }}" }
-        - { key: Hostname,     value: "{{ inventory_hostname }}" }
+        - { key: Hostname, value: "{{ inventory_hostname }}" }
         - { key: HostMetadata, value: "lab-linux" }
       loop_control:
         label: "{{ item.key }}"
