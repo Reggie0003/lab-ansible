@@ -1,5 +1,6 @@
 - name: Apache web servers with hardening
   hosts: web
+  serial: 1
   become: true
   tasks:
     - name: Install Apache and mod_ssl
