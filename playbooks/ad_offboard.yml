@@ -1,0 +1,37 @@
+- name: Offboard an AD user (disable, remove groups, move to Disabled OU)
+  hosts: windows
+  gather_facts: false
+  vars:
+    domain_dn: DC=homelab-dc,DC=local
+    disabled_ou: "OU=Disabled,OU=Lab,{{ domain_dn }}"
+    dept_groups: [IT-Staff, HR-Staff, Sales-Staff]
+    protected_users: [administrator, ansible-svc, krbtgt, guest]
+  tasks:
+    - name: Make sure a user was given and is not protected
+      ansible.builtin.assert:
+        that:
+          - offboard_user is defined
+          - offboard_user | lower not in protected_users
+        fail_msg: "Run with -e offboard_user=<username>, and not a protected account"
+
+    - name: Look up the user
+      microsoft.ad.object_info:
+        ldap_filter: "(sAMAccountName={{ offboard_user }})"
+        properties: [Name, DistinguishedName]
+      register: found
+
+    - name: Stop unless exactly one user matched
+      ansible.builtin.assert:
+        that: found.objects | length == 1
+        fail_msg: "Expected 1 user named {{ offboard_user }}, found {{ found.objects | length }}"
+
+    - name: Disable, remove department groups, move to Disabled OU
+      microsoft.ad.user:
+        identity: "{{ offboard_user }}"
+        name: "{{ found.objects[0].Name }}"
+        enabled: false
+        path: "{{ disabled_ou }}"
+        description: "Offboarded by Ansible"
+        groups:
+          remove: "{{ dept_groups }}"
+        state: present
