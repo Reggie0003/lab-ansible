@@ -1,0 +1,4 @@
+baseline_admin_user: admin
+baseline_admin_group: admin
+baseline_ssh_pubkey_file: ~/.ssh/id_ed25519.pub
+baseline_timezone: America/New_York

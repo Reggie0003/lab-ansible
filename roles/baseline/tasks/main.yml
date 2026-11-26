@@ -1,0 +1,46 @@
+- name: Ensure admin group exists
+  ansible.builtin.group:
+    name: "{{ baseline_admin_group }}"
+    state: present
+
+- name: Ensure admin user exists
+  ansible.builtin.user:
+    name: "{{ baseline_admin_user }}"
+    groups: "{{ baseline_admin_group }}"
+    shell: /bin/bash
+    state: present
+
+- name: Grant passwordless sudo to admin group
+  ansible.builtin.copy:
+    dest: "/etc/sudoers.d/{{ baseline_admin_group }}"
+    content: "%{{ baseline_admin_group }} ALL=(ALL) NOPASSWD:ALL\n"
+    validate: /usr/sbin/visudo -cf %s
+    mode: '0440'
+
+- name: Ensure admin's SSH authorized_keys is in place
+  ansible.posix.authorized_key:
+    user: "{{ baseline_admin_user }}"
+    key: "{{ lookup('file', baseline_ssh_pubkey_file) }}"
+    state: present
+
+- name: Install chrony (time sync)
+  ansible.builtin.dnf:
+    name: chrony
+    state: present
+
+- name: Ensure chronyd is running and enabled
+  ansible.builtin.service:
+    name: chronyd
+    state: started
+    enabled: true
+
+- name: Read current timezone
+  ansible.builtin.command: timedatectl show -p Timezone --value
+  register: baseline_current_tz
+  changed_when: false
+  check_mode: false
+
+- name: Set timezone if it is different
+  ansible.builtin.command: "timedatectl set-timezone {{ baseline_timezone }}"
+  when: baseline_current_tz.stdout != baseline_timezone
+  changed_when: true

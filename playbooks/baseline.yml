@@ -1,0 +1,6 @@
+- name: Baseline for every Linux server (admin user, sudo, SSH key, time)
+  hosts: lab
+  become: true
+  roles:
+    - role: baseline
+      tags: [baseline]

@@ -1,0 +1,22 @@
+# site.yml: build or re-check the whole lab, in dependency order.
+# Each playbook below still works on its own.
+- name: Baseline (admin user, sudo, SSH key, time)
+  ansible.builtin.import_playbook: playbooks/baseline.yml
+
+- name: Security (firewalld, SELinux)
+  ansible.builtin.import_playbook: playbooks/security.yml
+
+- name: Web servers (Apache)
+  ansible.builtin.import_playbook: playbooks/web.yml
+
+- name: Zabbix server and Linux agents
+  ansible.builtin.import_playbook: playbooks/zabbix_setup1.yml
+
+- name: Zabbix agent on the domain controller
+  ansible.builtin.import_playbook: playbooks/zabbix_windowsetup1.yml
+
+- name: Active Directory OUs, groups and users
+  ansible.builtin.import_playbook: playbooks/ad_users.yml
+
+- name: Domain controller health check (read-only)
+  ansible.builtin.import_playbook: playbooks/dc_health.yml
