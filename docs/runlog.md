@@ -4,6 +4,7 @@ One line per change, newest first. Result = what the PLAY RECAP showed.
 
 | Date | Change | Playbook | Hosts | Result | Notes |
 | --- | --- | --- | --- | --- | --- |
+| 2026-11-25 | OpenSCAP CIS L1 baseline scan | openscap_scan.yml | lab | webnode 76.22% (152 pass / 107 fail, 4 high) | reports kept out of git |
 | 2026-11-25 | Converted Apache to role, fixed handler chain | web.yml | webnode, backupnode | check changed=0 | handlers now use listen |
 | 2026-11-25 | Firewall tasks moved into roles/firewall | security.yml | lab | check: changed=0 | First role; roles_path added to ansible.cfg |
 | 2026-11-25 | Added firewall/selinux tags | security.yml | lab | check: changed=0 | `--tags selinux` runs only SELinux tasks |

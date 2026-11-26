@@ -1,37 +1,38 @@
----
-- name: OpenSCAP compliance scan
+- name: OpenSCAP CIS Level 1 scan
   hosts: lab
   become: true
   vars:
     scap_profile: xccdf_org.ssgproject.content_profile_cis_server_l1
     scap_content: /usr/share/xml/scap/ssg/content/ssg-rhel9-ds.xml
-    scan_label: baseline          # override with -e scan_label=after
+    scan_label: baseline
   tasks:
-    - name: Install OpenSCAP scanner and security guide
+    - name: Install OpenSCAP scanner and content
       ansible.builtin.dnf:
-        name: [openscap-scanner, scap-security-guide]
+        name:
+          - openscap-scanner
+          - scap-security-guide
         state: present
 
-    - name: Run CIS Level 1 scan
+    - name: Run the scan
       ansible.builtin.command: >
         oscap xccdf eval
         --profile {{ scap_profile }}
-        --results /tmp/{{ inventory_hostname }}-{{ scan_label }}.xml
-        --report /tmp/{{ inventory_hostname }}-{{ scan_label }}.html
+        --results /tmp/oscap-{{ scan_label }}.xml
+        --report /tmp/oscap-{{ scan_label }}.html
         {{ scap_content }}
       register: scan
-      failed_when: scan.rc not in [0, 2]
       changed_when: false
+      failed_when: scan.rc not in [0, 2]
 
-    - name: Pull the HTML report back to controlnode
-      ansible.builtin.fetch:
-        src: /tmp/{{ inventory_hostname }}-{{ scan_label }}.html
-        dest: reports/{{ scan_label }}/{{ inventory_hostname }}.html
-        flat: true
-
-    - name: Show pass/fail counts
+    - name: Show pass and fail counts
       ansible.builtin.debug:
         msg: >-
           {{ inventory_hostname }}:
-          {{ scan.stdout | regex_findall('Result\s+pass') | length }} passed,
-          {{ scan.stdout | regex_findall('Result\s+fail') | length }} failed
+          pass={{ scan.stdout_lines | select('search', 'Result\s+pass$') | list | length }}
+          fail={{ scan.stdout_lines | select('search', 'Result\s+fail$') | list | length }}
+
+    - name: Bring the HTML report back to controlnode
+      ansible.builtin.fetch:
+        src: /tmp/oscap-{{ scan_label }}.html
+        dest: "{{ playbook_dir }}/../reports/{{ scan_label }}/{{ inventory_hostname }}.html"
+        flat: true
