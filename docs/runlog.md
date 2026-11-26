@@ -4,6 +4,7 @@ One line per change, newest first. Result = what the PLAY RECAP showed.
 
 | Date | Change | Playbook | Hosts | Result | Notes |
 | --- | --- | --- | --- | --- | --- |
+| 2026-11-25 | Firewall tasks moved into roles/firewall | security.yml | lab | check: changed=0 | First role; roles_path added to ansible.cfg |
 | 2026-11-25 | Added firewall/selinux tags | security.yml | lab | check: changed=0 | `--tags selinux` runs only SELinux tasks |
 | 2026-11-25 | Added tags (apache, apache_config, ...) | web.yml | web | check: changed=0 | `--tags apache_config` verified |
 | 2026-11-25 | Rolling updates with `serial: 1` | web.yml | web | check: changed=0 | webnode finishes before backupnode starts |

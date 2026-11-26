@@ -1,40 +1,10 @@
 - name: Firewalld and SELinux baseline
   hosts: lab
   become: true
+  roles:
+    - role: firewall
+      tags: [firewall]
   tasks:
-    - name: Ensure firewalld is installed
-      ansible.builtin.dnf:
-        name: firewalld
-        state: present
-      tags: [firewall]
-
-    - name: Ensure firewalld is running and enabled
-      ansible.builtin.service:
-        name: firewalld
-        state: started
-        enabled: true
-      tags: [firewall]
-
-    - name: Allow role services
-      ansible.posix.firewalld:
-        service: "{{ item }}"
-        permanent: true
-        immediate: true
-        state: enabled
-      loop: "{{ firewall_services }}"
-      tags: [firewall]
-
-    - name: Allow role ports
-      ansible.posix.firewalld:
-        port: "{{ item }}"
-        permanent: true
-        immediate: true
-        state: enabled
-      loop: "{{ firewall_ports }}"
-      tags: [firewall]
-
-    # TODO (Step 4b OpenSCAP): remove cockpit and dhcpv6-client if not needed
-
     - name: Ensure SELinux is enforcing
       ansible.posix.selinux:
         policy: targeted
