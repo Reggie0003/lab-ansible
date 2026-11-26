@@ -1,0 +1,10 @@
+- name: Check Apache config
+  ansible.builtin.command: apachectl configtest
+  changed_when: false
+  listen: Restart httpd
+
+- name: Restart Apache
+  ansible.builtin.service:
+    name: httpd
+    state: restarted
+  listen: Restart httpd

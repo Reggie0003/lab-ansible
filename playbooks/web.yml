@@ -2,46 +2,6 @@
   hosts: web
   serial: 1
   become: true
-  tasks:
-    - name: Install Apache and mod_ssl
-      ansible.builtin.dnf:
-        name: [httpd, mod_ssl]
-        state: present
-      tags: [apache, apache_install]
-
-    - name: Deploy hardening config
-      ansible.builtin.template:
-        src: security.conf.j2
-        dest: /etc/httpd/conf.d/security.conf
-        owner: root
-        group: root
-        mode: '0644'
-      notify: Restart httpd
-      tags: [apache, apache_config]
-
-    - name: Deploy test page
-      ansible.builtin.template:
-        src: index.html.j2
-        dest: /var/www/html/index.html
-        owner: root
-        group: root
-        mode: '0644'
-      tags: [apache, web_content]
-
-    - name: Ensure httpd is running and enabled
-      ansible.builtin.service:
-        name: httpd
-        state: started
-        enabled: true
-      tags: [apache, apache_service]
-
-  handlers:
-    - name: Restart httpd
-      ansible.builtin.command: apachectl configtest
-      changed_when: false
-      notify: Really restart httpd
-
-    - name: Really restart httpd
-      ansible.builtin.service:
-        name: httpd
-        state: restarted
+  roles:
+    - role: apache
+      tags: [apache]

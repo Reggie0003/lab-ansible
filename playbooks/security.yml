@@ -4,16 +4,5 @@
   roles:
     - role: firewall
       tags: [firewall]
-  tasks:
-    - name: Ensure SELinux is enforcing
-      ansible.posix.selinux:
-        policy: targeted
-        state: enforcing
-      register: selinux_result
-      tags: [selinux]
-
-    - name: Warn if a reboot is needed for SELinux
-      ansible.builtin.debug:
-        msg: "SELinux change needs a reboot on {{ inventory_hostname }}"
-      when: selinux_result.reboot_required | default(false)
+    - role: selinux
       tags: [selinux]

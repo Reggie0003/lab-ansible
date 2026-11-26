@@ -1,0 +1,33 @@
+- name: Install Apache and mod_ssl
+  ansible.builtin.dnf:
+    name:
+      - httpd
+      - mod_ssl
+    state: present
+  tags: [apache_install]
+
+- name: Deploy hardening config
+  ansible.builtin.template:
+    src: security.conf.j2
+    dest: /etc/httpd/conf.d/security.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart httpd
+  tags: [apache_config]
+
+- name: Deploy test page
+  ansible.builtin.template:
+    src: index.html.j2
+    dest: /var/www/html/index.html
+    owner: root
+    group: root
+    mode: "0644"
+  tags: [web_content]
+
+- name: Ensure httpd is running and enabled
+  ansible.builtin.service:
+    name: httpd
+    state: started
+    enabled: true
+  tags: [apache_service]
