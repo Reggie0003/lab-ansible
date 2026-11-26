@@ -1,0 +1,47 @@
+- name: Check whether the agent is already installed
+  ansible.windows.win_service_info:
+    name: Zabbix Agent 2
+  register: zabbix_agent_windows_svc
+
+- name: Download agent installer (only if not installed)
+  ansible.windows.win_get_url:
+    url: "{{ zabbix_agent_windows_msi_url }}"
+    dest: "{{ zabbix_agent_windows_msi_path }}"
+    mode: '0644'
+  when: not zabbix_agent_windows_svc.exists
+
+- name: Install Zabbix agent 2 (only if not installed)
+  ansible.windows.win_package:
+    path: "{{ zabbix_agent_windows_msi_path }}"
+    arguments: >-
+      /qn
+      SERVER={{ zabbix_agent_windows_server_ip }}
+      SERVERACTIVE={{ zabbix_agent_windows_server_ip }}
+      HOSTNAME={{ inventory_hostname }}
+    creates_service: Zabbix Agent 2
+    state: present
+  when: not zabbix_agent_windows_svc.exists
+
+- name: Set host metadata for autoregistration
+  community.windows.win_lineinfile:
+    path: "{{ zabbix_agent_windows_conf_path }}"
+    regexp: '^#?\s*HostMetadata='
+    line: "HostMetadata={{ zabbix_agent_windows_metadata }}"
+  notify: Restart agent
+
+- name: Allow port 10050 from zabbixnode only
+  ansible.windows.win_shell: |
+    if (-not (Get-NetFirewallRule -DisplayName "Zabbix Agent - zabbixnode" -ErrorAction SilentlyContinue)) {
+      New-NetFirewallRule -DisplayName "Zabbix Agent - zabbixnode" `
+        -Direction Inbound -Protocol TCP -LocalPort 10050 `
+        -RemoteAddress {{ zabbix_agent_windows_server_ip }} -Action Allow
+      "created"
+    }
+  register: zabbix_agent_windows_fw
+  changed_when: "'created' in zabbix_agent_windows_fw.stdout"
+
+- name: Agent running and set to automatic
+  ansible.windows.win_service:
+    name: Zabbix Agent 2
+    start_mode: auto
+    state: started

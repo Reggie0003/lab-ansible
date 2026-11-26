@@ -4,6 +4,7 @@ One line per change, newest first. Result = what the PLAY RECAP showed.
 
 | Date | Change | Playbook | Hosts | Result | Notes |
 | --- | --- | --- | --- | --- | --- |
+| 2026-11-26 | Windows Zabbix agent moved into a role | zabbix_windowsetup1.yml | dc-homelab | check changed=0 | installer only downloads if agent missing |
 | 2026-11-26 | Zabbix server moved into a role | zabbix_setup1.yml | monitoring | check changed=0 | schema check now runs in check mode |
 | 2026-11-26 | Zabbix agent moved into a role | zabbix_setup1.yml | lab | check changed=0 on all 5 | vars prefixed zabbix_agent_* |
 | 2026-11-25 | Zabbix web scenarios + High triggers | GUI | webnode, backupnode | outage on backupnode detected and resolved | disabled duplicate "Zabbix server" host; email alerts pending (home) |

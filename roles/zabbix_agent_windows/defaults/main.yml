@@ -1,0 +1,8 @@
+zabbix_agent_windows_version: "7.0.32"
+zabbix_agent_windows_server_ip: 192.168.1.171
+zabbix_agent_windows_metadata: lab-windows
+zabbix_agent_windows_cdn: https://cdn.zabbix.com/zabbix/binaries/stable/7.0
+zabbix_agent_windows_msi_name: "zabbix_agent2-{{ zabbix_agent_windows_version }}-windows-amd64-openssl.msi"
+zabbix_agent_windows_msi_url: "{{ zabbix_agent_windows_cdn }}/{{ zabbix_agent_windows_version }}/{{ zabbix_agent_windows_msi_name }}"
+zabbix_agent_windows_msi_path: 'C:\Windows\Temp\zabbix_agent2.msi'
+zabbix_agent_windows_conf_path: 'C:\Program Files\Zabbix Agent 2\zabbix_agent2.conf'
