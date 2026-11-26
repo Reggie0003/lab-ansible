@@ -1,0 +1,40 @@
+- name: Create OU structure
+  microsoft.ad.ou:
+    name: "{{ item.name }}"
+    path: "{{ item.path }}"
+    state: present
+    protect_from_deletion: true
+  loop: "{{ ad_users_ous }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Create department groups
+  microsoft.ad.group:
+    name: "{{ item }}"
+    scope: global
+    category: security
+    path: "OU=Groups,{{ ad_users_lab_dn }}"
+    state: present
+  loop: "{{ ad_users_groups }}"
+
+- name: Create active users in their department OU
+  microsoft.ad.user:
+    name: "{{ item.first }} {{ item.last }}"
+    sam_account_name: "{{ item.sam }}"
+    upn: "{{ item.sam }}@{{ ad_users_upn_suffix }}"
+    firstname: "{{ item.first }}"
+    surname: "{{ item.last }}"
+    display_name: "{{ item.first }} {{ item.last }}"
+    path: "OU={{ item.dept }},OU=Users,{{ ad_users_lab_dn }}"
+    password: "{{ ad_users_password }}"
+    update_password: on_create
+    password_expired: true
+    enabled: true
+    groups:
+      add:
+        - "{{ item.dept }}-Staff"
+    state: present
+  loop: "{{ ad_users_accounts | rejectattr('sam', 'in', ad_users_offboarded) | list }}"
+  loop_control:
+    label: "{{ item.sam }}"
+  no_log: "{{ hide_secrets | default(true) }}"

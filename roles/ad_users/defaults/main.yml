@@ -1,0 +1,28 @@
+ad_users_domain_dn: "DC=homelab-dc,DC=local"
+ad_users_lab_dn: "OU=Lab,{{ ad_users_domain_dn }}"
+ad_users_upn_suffix: homelab-dc.local
+ad_users_password: "{{ vault_ad_user_password }}"
+
+ad_users_ous:
+  - { name: Lab, path: "{{ ad_users_domain_dn }}" }
+  - { name: Users, path: "{{ ad_users_lab_dn }}" }
+  - { name: Groups, path: "{{ ad_users_lab_dn }}" }
+  - { name: Computers, path: "{{ ad_users_lab_dn }}" }
+  - { name: Disabled, path: "{{ ad_users_lab_dn }}" }
+  - { name: IT, path: "OU=Users,{{ ad_users_lab_dn }}" }
+  - { name: HR, path: "OU=Users,{{ ad_users_lab_dn }}" }
+  - { name: Sales, path: "OU=Users,{{ ad_users_lab_dn }}" }
+
+ad_users_groups:
+  - IT-Staff
+  - HR-Staff
+  - Sales-Staff
+
+ad_users_accounts:
+  - { sam: jsmith, first: John, last: Smith, dept: IT }
+  - { sam: mjones, first: Maria, last: Jones, dept: HR }
+  - { sam: abrown, first: Alex, last: Brown, dept: Sales }
+
+# People who have left. Onboarding skips them so it never re-enables them.
+ad_users_offboarded:
+  - abrown
