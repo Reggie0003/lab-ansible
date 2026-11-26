@@ -1,0 +1,30 @@
+- name: Install Zabbix repo package
+  ansible.builtin.dnf:
+    name: "{{ zabbix_agent_repo_rpm }}"
+    state: present
+    disable_gpg_check: true
+
+- name: Install Zabbix agent 2
+  ansible.builtin.dnf:
+    name: zabbix-agent2
+    state: present
+
+- name: Configure agent
+  ansible.builtin.lineinfile:
+    path: /etc/zabbix/zabbix_agent2.conf
+    regexp: "^#?\\s*{{ item.key }}="
+    line: "{{ item.key }}={{ item.value }}"
+  loop:
+    - { key: Server, value: "{{ zabbix_agent_server_ip }},127.0.0.1" }
+    - { key: ServerActive, value: "{{ zabbix_agent_server_ip }}" }
+    - { key: Hostname, value: "{{ inventory_hostname }}" }
+    - { key: HostMetadata, value: "{{ zabbix_agent_metadata }}" }
+  loop_control:
+    label: "{{ item.key }}"
+  notify: Restart agent
+
+- name: Start and enable agent
+  ansible.builtin.service:
+    name: zabbix-agent2
+    state: started
+    enabled: true
