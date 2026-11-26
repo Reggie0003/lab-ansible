@@ -4,6 +4,7 @@ One line per change, newest first. Result = what the PLAY RECAP showed.
 
 | Date | Change | Playbook | Hosts | Result | Notes |
 | --- | --- | --- | --- | --- | --- |
+| 2026-11-25 | Zabbix web scenarios + High triggers | GUI | webnode, backupnode | outage on backupnode detected and resolved | disabled duplicate "Zabbix server" host; email alerts pending (home) |
 | 2026-11-25 | AD offboarding playbook | ad_offboard.yml | dc-homelab | abrown disabled and moved; rerun changed=0 | protected-account guard tested |
 | 2026-11-25 | OpenSCAP CIS L1 baseline scan | openscap_scan.yml | lab | webnode 76.22% (152 pass / 107 fail, 4 high) | reports kept out of git |
 | 2026-11-25 | Converted Apache to role, fixed handler chain | web.yml | webnode, backupnode | check changed=0 | handlers now use listen |
